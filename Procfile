@@ -1,0 +1,1 @@
+web: gunicorn django_companies.wsgi:application --workers 3 --threads 2
