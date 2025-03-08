@@ -4,10 +4,10 @@ import pandas as pd
 df = pd.read_csv('data/companies.csv')
 
 # Print the first 5 rows
-print(df[['name', 'rating', 'review', 'company_type', 'Head_Quarters', 'Company_Age']].head())
+# print(df[['name', 'rating', 'review', 'company_type', 'Head_Quarters', 'Company_Age']].head())
 
 # # Print all columns
-# print(df.columns)
+print(df.columns)
 
 # # Print the shape of the dataframe
 # print(df.shape)
