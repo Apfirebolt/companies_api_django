@@ -58,6 +58,7 @@ INSTALLED_APPS = [
 
     # Add the companies app to the list of installed apps
     'accounts',
+    'core',
     'api'
 ]
 

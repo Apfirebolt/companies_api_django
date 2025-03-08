@@ -9,11 +9,7 @@ from .serializers import (
     ListCustomUserSerializer,
     CustomUserSerializer,
     CustomTokenObtainPairSerializer,
-    SubRedditSerializer,
-    PostSerializer,
-    CommentSerializer,
-    PostVoteSerializer,
-    RulesSerializer,
+    CompanySerializer
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -21,6 +17,7 @@ from rest_framework import filters
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 from accounts.models import CustomUser
+from core.models import Company
 from rest_framework.response import Response
 from .pagination import CustomPagination
 
@@ -70,3 +67,18 @@ class UserProfileApiView(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         return self.request.user
+    
+
+class ListCompaniesApiView(ListCreateAPIView):
+    serializer_class = CompanySerializer
+    queryset = Company.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+        filters.SearchFilter,
+    ]
+    filterset_fields = ["name", "rating", "company_type", "head_quarters",]
+    ordering_fields = ["name", "rating", "company_type", "head_quarters"]
+    search_fields = ["name", "rating", "company_type", "head_quarters"]
+    pagination_class = CustomPagination
