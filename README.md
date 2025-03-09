@@ -176,11 +176,9 @@ class ListCompaniesApiView(ListCreateAPIView):
         cache.set(cache_key, data, settings.CACHE_TTL if hasattr(settings, 'CACHE_TTL') else 60)  # Default TTL 60 seconds
 ```
 
-Django Celery Integration
+### Django Celery Integration
 
 Running Celery Beat from the command line within a Django project involves a few key steps, particularly when using django-celery-beat. Here's a breakdown of the process:
-
-Prerequisites:
 
 Celery and django-celery-beat installed: Ensure you have Celery and the django-celery-beat package installed in your Django project's virtual environment.
 Redis (or another broker) running: Your message broker (typically Redis) needs to be up and running.
@@ -212,9 +210,12 @@ python manage.py migrate
 
 #### 1. Install Celery and Redis (or another broker)
 
-# Using pip:
-# pip install celery redis django-celery-beat
+- Using pip:
 
+```
+pip install celery redis django-celery-beat django-redis
+```
+It assumes you're using Redis as message broker.
 
 #### 2. Create a Celery instance
 
@@ -245,8 +246,6 @@ def debug_task(self):
     print(f'Request: {self.request!r}')
 ```
 
-# Replace 'your_project_name' with your actual project name.
-
 #### 3. Configure Celery by making following changes in settings.py
 
 ```
@@ -260,6 +259,8 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler' # Requ
 ```
 
 #### 4. Run Redis or RabbitMQ server
+
+Check through the terminal or GUI whether you're configured message broker is running or not.
 
 #### 5. Start the Celery Worker
 
@@ -316,7 +317,6 @@ CELERY_BEAT_SCHEDULE = {
 
 - Run database migrations to create the necessary tables for django-celery-beat:
 - python manage.py migrate
-
 
 ```
 celery -A django_companies beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
