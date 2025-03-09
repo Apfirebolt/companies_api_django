@@ -176,4 +176,154 @@ class ListCompaniesApiView(ListCreateAPIView):
         cache.set(cache_key, data, settings.CACHE_TTL if hasattr(settings, 'CACHE_TTL') else 60)  # Default TTL 60 seconds
 ```
 
+Django Celery Integration
 
+Running Celery Beat from the command line within a Django project involves a few key steps, particularly when using django-celery-beat. Here's a breakdown of the process:
+
+Prerequisites:
+
+Celery and django-celery-beat installed: Ensure you have Celery and the django-celery-beat package installed in your Django project's virtual environment.
+Redis (or another broker) running: Your message broker (typically Redis) needs to be up and running.
+Django project setup: Your Django project should be properly configured with Celery.
+
+```
+celery -A django_companies beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+```
+
+- `celery`: This invokes the Celery command-line tool.
+- `-A django_companies`: This tells Celery where to find your Celery app instance.
+- `beat`: This tells Celery to run the Beat scheduler.
+- `-l info`: This sets the logging level to "info," so you'll see informative messages about scheduled tasks.
+- `--scheduler django_celery_beat.schedulers:DatabaseScheduler`: This is crucial when using `django-celery-beat`. It tells Celery Beat to use the database scheduler provided by `django-celery-beat`, which allows you to manage periodic tasks through the Django admin interface.
+
+### Important considerations
+
+- Worker Running: Remember that Celery Beat only schedules tasks. You also need to have Celery Workers running to actually execute those tasks. To run a worker, you would use a command similar to this:
+
+```
+celery -A django_companies worker -l info
+```
+
+django-celery-beat database: If you are using django-celery-beat, ensure that you have run the database migrations.
+
+```
+python manage.py migrate
+```
+
+#### 1. Install Celery and Redis (or another broker)
+
+# Using pip:
+# pip install celery redis django-celery-beat
+
+
+#### 2. Create a Celery instance
+
+In your Django project's main app directory (the one containing settings.py), create a file named celery.py:
+
+#### django_companies/celery.py
+
+```Python
+import os
+from celery import Celery
+
+# Set the default Django settings module for the 'celery' program.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_companies.settings')
+
+app = Celery('django_companies')
+
+# Using a string here means the worker doesn't have to serialize
+# the configuration object to child processes.
+# - namespace='CELERY' means all celery-related configuration keys
+#   should have a `CELERY_` prefix.
+app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Load task modules from all registered Django app configs.
+app.autodiscover_tasks()
+
+@app.task(bind=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')
+```
+
+# Replace 'your_project_name' with your actual project name.
+
+#### 3. Configure Celery by making following changes in settings.py
+
+```
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'  # Or 'amqp://guest:guest@localhost:5672//' for RabbitMQ
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0' # Same as Broker or another redis instance
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC' # Or your desired timezone.
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler' # Required for django celery beat.
+```
+
+#### 4. Run Redis or RabbitMQ server
+
+#### 5. Start the Celery Worker
+
+- Open a terminal and navigate to your project directory.
+- Run the following command:
+
+```
+celery -A django_companies worker -l info
+```
+
+#### 6. Start Celery Beat (for scheduled tasks)
+
+- To schedule tasks, you need to start Celery Beat.
+- Open another terminal window and run:
+
+```
+celery -A your_project_name beat -l info
+```
+
+#### 7. Create tasks for your Django app
+
+Inside companies/tasks.py file
+
+```Python
+from celery import shared_task
+from celery.utils.log import get_task_logger
+
+logger = get_task_logger(__name__)
+
+@shared_task
+def example_task(param1, param2):
+    logger.info(f"Executing example_task with {param1}, {param2}")
+    result = param1 + param2
+    print(f"Example Task Result: {result}")
+    return result
+
+```
+
+#### 8. Define Scheduled Tasks inside settings.py file
+
+```Python
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'add-every-minute': {
+        'task': 'myapp.tasks.example_task',
+        'schedule': crontab(minute='*/1'),
+        'args': (16, 16)
+    },
+}
+```
+
+#### 9. Run Celery Migrations
+
+- Run database migrations to create the necessary tables for django-celery-beat:
+- python manage.py migrate
+
+
+```
+celery -A django_companies beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+```
+
+Running the worker 
+
+```
+celery -A django_companies worker -l info
+```

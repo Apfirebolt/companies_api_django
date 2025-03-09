@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
+from celery.schedules import crontab
 from datetime import timedelta
 from dotenv import load_dotenv
 
@@ -55,6 +56,8 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'drf_spectacular',
     'django_filters',
+    'django_celery_beat',
+    'django_redis',
 
     # Add the companies app to the list of installed apps
     'accounts',
@@ -143,6 +146,23 @@ CACHES = {
 }
 
 CACHE_TTL = 300
+
+# Celery settings
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'  # Or 'amqp://guest:guest@localhost:5672//' for RabbitMQ
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0' # Same as Broker or another redis instance
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC' # Or your desired timezone.
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler' # Required for django celery beat.
+
+CELERY_BEAT_SCHEDULE = {
+    'add-every-minute': {
+        'task': 'core.tasks.example_task',
+        'schedule': crontab(minute='*/1'),
+        'args': (16, 16)
+    },
+}
 
 # Docs settings
 SPECTACULAR_SETTINGS = {
