@@ -13,15 +13,15 @@
         {{ " " }}
         <span class="font-medium">
           {{
-            currentPage * numberOfItemsPerPage < allUrls.total
+            currentPage * numberOfItemsPerPage < allCompanies.count
               ? currentPage * numberOfItemsPerPage
-              : allUrls.total
+              : allCompanies.total
           }}
         </span>
         {{ " " }}
         of
         {{ " " }}
-        <span class="font-medium">{{ allUrls.total }}</span>
+        <span class="font-medium">{{ allCompanies.count }}</span>
         {{ " " }}
         results
       </p>
@@ -48,18 +48,14 @@ import { computed, toRefs } from "vue";
 const props = defineProps({
   currentPage: Number,
   numberOfItemsPerPage: Number,
-  allUrls: Object,
+  allCompanies: Object,
 });
 
 const emits = defineEmits(["goToPreviousPage", "goToNextPage"]);
-const {  currentPage, numberOfItemsPerPage, allUrls } = toRefs(props);
+const {  currentPage, numberOfItemsPerPage, allCompanies } = toRefs(props);
 
 const showCurrentIndex = computed(() => {
-  if (currentPage.value === 1) {
-    return 1;
-  } else {
-    return currentPage.value * numberOfItemsPerPage - numberOfItemsPerPage + 1;
-  }
+  return currentPage.value * numberOfItemsPerPage.value - numberOfItemsPerPage.value + 1;
 });
 
 const previosPageHandler = async () => {

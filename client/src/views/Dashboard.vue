@@ -8,7 +8,7 @@
           <span class="text-lg font-semibold text-gray-700">
             {{ authData.username }}
           </span>
-          Here you can add, view, and delete urls.
+          Here you can view companies.
         </p>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div
@@ -29,18 +29,43 @@
     </div>
   </section>
   <!-- Pagination -->
+  <Pagination v-if="companyData"
+    @go-to-previous-page="goToPreviousPage"
+    @go-to-next-page="goToNextPage"
+    :allCompanies="companyData"
+    :current-page="currentPage"
+    :number-of-items-per-page="itemsPerPage"
+  />
 </template>
 
 <script setup>
 import { onMounted, ref, computed } from "vue";
 import { useAuth } from "../store/auth";
 import { useCompanyStore } from "../store/company";
+import Pagination from "../components/Pagination.vue";
 
 const auth = useAuth();
 const companyStore = useCompanyStore();
+const currentPage = ref(1);
+const itemsPerPage = ref(20);
 
 const authData = computed(() => auth.getAuthData);
 const companyData = computed(() => companyStore.getCompanies);
+
+const goToNextPage = async () => {
+  let total_pages = Math.ceil(companyData.value.count / itemsPerPage.value);
+  if (currentPage.value < total_pages) {
+    currentPage.value += 1;
+    await companyStore.getCompaniesAction(currentPage.value);
+  }
+};
+
+const goToPreviousPage = async () => {
+  if (currentPage.value > 1) {
+    currentPage.value -= 1;
+    await companyStore.getCompaniesAction(currentPage.value);
+  }
+};
 
 onMounted(() => {
   companyStore.getCompaniesAction();
