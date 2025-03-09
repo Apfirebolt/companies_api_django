@@ -113,3 +113,67 @@ This project is licensed under the MIT License.
 
 - [Django](https://www.djangoproject.com/)
 - [Django Rest Framework](https://www.django-rest-framework.org/)
+
+
+## Improvements
+
+Search on name and head_quarters columns
+
+Before Indexing
+
+search on 'reliance' completed in anywhere between 16 to 30 ms without indexing
+
+Generic api calls without search took anywhere between 15 to 25 ms
+
+After indexing no significant improvement was achieved maybe 10%.
+
+After applying Redis cache, it improved the response time from 25ms to 5ms max.
+
+```Python
+class ListCompaniesApiView(ListCreateAPIView):
+    serializer_class = CompanySerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+        filters.SearchFilter,
+    ]
+    filterset_fields = ["name", "head_quarters",]
+    ordering_fields = ["name", "rating", "company_type", "head_quarters"]
+    search_fields = ["name", "head_quarters"]
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        return Company.objects.all()
+    
+    def get(self, request, *args, **kwargs):
+
+        cache_key = self.generate_cache_key(request)
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            return self.handle_cached_data(cached_data)
+
+        response = super().get(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            self.cache_response(cache_key, response.data)
+
+        return response
+    
+    def generate_cache_key(self, request):
+        """Generates a unique cache key based on the request."""
+        query_params = request.query_params.copy()
+        query_params_str = str(sorted(query_params.items()))
+        return f"companies:{query_params_str}"
+
+    def handle_cached_data(self, cached_data):
+        """Handles returning cached data as a response."""
+        return Response(cached_data)
+
+    def cache_response(self, cache_key, data):
+        """Caches the response data."""
+        cache.set(cache_key, data, settings.CACHE_TTL if hasattr(settings, 'CACHE_TTL') else 60)  # Default TTL 60 seconds
+```
+
+

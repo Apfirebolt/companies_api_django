@@ -130,6 +130,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Cache settings
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://localhost:6379",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "KEY_PREFIX": "companies"
+        }
+    }
+}
+
+CACHE_TTL = 300
+
 # Docs settings
 SPECTACULAR_SETTINGS = {
     'TITLE': 'An API listing all companies from India',

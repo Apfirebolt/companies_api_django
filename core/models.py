@@ -11,3 +11,11 @@ class Company(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name_plural = "Companies"
+        ordering = ["-rating"]
+        indexes = [
+            models.Index(fields=["name"]),
+            models.Index(fields=["head_quarters"]),
+        ]

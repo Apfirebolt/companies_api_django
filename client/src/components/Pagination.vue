@@ -1,5 +1,5 @@
 <template>
-    <nav
+  <nav
     class="container mx-auto px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6"
     aria-label="Pagination"
   >
@@ -33,8 +33,8 @@
         :class="[
           'relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md mx-2',
           currentPage === 1
-        ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
-        : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+            ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
+            : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50',
         ]"
       >
         Previous
@@ -45,7 +45,7 @@
           'relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md mx-2',
           currentPage * numberOfItemsPerPage >= allCompanies.count
             ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
-            : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+            : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50',
         ]"
         :disabled="currentPage * numberOfItemsPerPage >= allCompanies.count"
       >
@@ -64,10 +64,14 @@ const props = defineProps({
 });
 
 const emits = defineEmits(["goToPreviousPage", "goToNextPage"]);
-const {  currentPage, numberOfItemsPerPage, allCompanies } = toRefs(props);
+const { currentPage, numberOfItemsPerPage, allCompanies } = toRefs(props);
 
 const showCurrentIndex = computed(() => {
-  return currentPage.value * numberOfItemsPerPage.value - numberOfItemsPerPage.value + 1;
+  return (
+    currentPage.value * numberOfItemsPerPage.value -
+    numberOfItemsPerPage.value +
+    1
+  );
 });
 
 const previosPageHandler = async () => {
