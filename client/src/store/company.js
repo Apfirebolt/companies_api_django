@@ -7,19 +7,19 @@ import { useToast } from "vue-toastification";
 const toast = useToast();
 const auth = useAuth();
 
-export const usePostStore = defineStore("post", {
+export const useCompanyStore = defineStore("company", {
   state: () => ({
-    post: ref({}),
-    posts: ref([]),
+    company: ref({}),
+    companies: ref([]),
     loading: ref(false),
   }),
 
   getters: {
-    getPost() {
-      return this.post;
+    getCompany() {
+      return this.company;
     },
-    getPosts() {
-      return this.posts;
+    getCompanies() {
+      return this.companies;
     },
     isLoading() {
       return this.loading;
@@ -27,17 +27,17 @@ export const usePostStore = defineStore("post", {
   },
 
   actions: {
-    async addPost(postData) {
+    async addCompany(companyData) {
       try {
         const headers = {
           Authorization: `Bearer ${auth.authData.token}`,
         };
         this.loading = true;
-        const response = await httpClient.post("post", postData, {
+        const response = await httpClient.post("companies", companyData, {
           headers,
         });
         if (response.status === 201) {
-          toast.success("Post added!");
+          toast.success("Company added!");
         }
       } catch (error) {
         console.log(error);
@@ -53,30 +53,30 @@ export const usePostStore = defineStore("post", {
       }
     },
 
-    async getPostAction(postId) {
+    async getCompanyAction(companyId) {
       try {
         const headers = {
           Authorization: `Bearer ${auth.authData.token}`,
         };
-        const response = await httpClient.get("post/" + postId, {
+        const response = await httpClient.get("companies/" + companyId, {
           headers,
         });
-        this.post = response.data;
+        this.company = response.data;
       } catch (error) {
         console.log(error);
       }
     },
 
-    async getPostsAction(page = 1) {
+    async getCompaniesAction(page = 1) {
       try {
         const headers = {
           Authorization: `Bearer ${auth.authData.token}`,
         };
         this.loading = true;
-        const response = await httpClient.get("post?page=" + page, {
+        const response = await httpClient.get("companies?page=" + page, {
           headers,
         });
-        this.posts = response.data;
+        this.companies = response.data;
       } catch (error) {
         console.log(error);
         return error;
@@ -85,17 +85,17 @@ export const usePostStore = defineStore("post", {
       }
     },
 
-    async deletePost(postId) {
+    async deleteCompany(companyId) {
       try {
         const headers = {
           Authorization: `Bearer ${auth.authData.token}`,
         };
         this.loading = true;
-        const response = await httpClient.delete("post/" + postId, {
+        const response = await httpClient.delete("company/" + companyId, {
           headers,
         });
         if (response.status === 200) {
-          toast.success("Post deleted!");
+          toast.success("Company deleted!");
         }
       } catch (error) {
         console.log(error);
@@ -105,17 +105,17 @@ export const usePostStore = defineStore("post", {
       }
     },
 
-    async updatePost(postData) {
+    async updateCompany(companyData) {
       try {
         const headers = {
           Authorization: `Bearer ${auth.authData.token}`,
         };
         this.loading = true;
-        const response = await httpClient.put("post/" + postData.id, postData, {
+        const response = await httpClient.put("company/" + companyData.id, companyData, {
           headers,
         });
         if (response.status === 200) {
-          toast.success("Post updated!");
+          toast.success("Company updated!");
         }
       } catch (error) {
         console.log(error);
@@ -125,9 +125,9 @@ export const usePostStore = defineStore("post", {
       }
     },
 
-    resetPostData() {
-      this.post = {};
-      this.posts = [];
+    resetCompanyData() {
+      this.company = {};
+      this.companies = [];
     },
   },
 });
