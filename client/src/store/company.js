@@ -67,14 +67,19 @@ export const useCompanyStore = defineStore("company", {
       }
     },
 
-    async getCompaniesAction(page = 1) {
+    async getCompaniesAction(page = 1, page_size = 25, search = "") {
       try {
         const headers = {
           Authorization: `Bearer ${auth.authData.token}`,
         };
         this.loading = true;
-        const response = await httpClient.get("companies?page=" + page, {
+        const response = await httpClient.get("companies", {
           headers,
+          params: {
+            page,
+            page_size,
+            search,
+          },
         });
         this.companies = response.data;
       } catch (error) {
