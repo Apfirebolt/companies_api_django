@@ -9,13 +9,12 @@ from .serializers import (
     ListCustomUserSerializer,
     CustomUserSerializer,
     CustomTokenObtainPairSerializer,
-    CompanySerializer
+    CompanySerializer,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import filters
 from django.core.cache import cache
-from django_redis import get_redis_connection
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
@@ -23,6 +22,8 @@ from accounts.models import CustomUser
 from core.models import Company
 from rest_framework.response import Response
 from .pagination import CustomPagination
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.viewsets import ViewSet
 
 
 class CreateCustomUserApiView(CreateAPIView):
@@ -70,7 +71,7 @@ class UserProfileApiView(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         return self.request.user
-    
+
 
 class ListCompaniesApiView(ListCreateAPIView):
     serializer_class = CompanySerializer
@@ -80,14 +81,17 @@ class ListCompaniesApiView(ListCreateAPIView):
         filters.OrderingFilter,
         filters.SearchFilter,
     ]
-    filterset_fields = ["name", "head_quarters",]
+    filterset_fields = [
+        "name",
+        "head_quarters",
+    ]
     ordering_fields = ["name", "rating", "company_type", "head_quarters"]
     search_fields = ["name", "head_quarters"]
     pagination_class = CustomPagination
 
     def get_queryset(self):
         return Company.objects.all()
-    
+
     def get(self, request, *args, **kwargs):
 
         cache_key = self.generate_cache_key(request)
@@ -102,7 +106,7 @@ class ListCompaniesApiView(ListCreateAPIView):
             self.cache_response(cache_key, response.data)
 
         return response
-    
+
     def generate_cache_key(self, request):
         """Generates a unique cache key based on the request."""
         query_params = request.query_params.copy()
@@ -115,4 +119,31 @@ class ListCompaniesApiView(ListCreateAPIView):
 
     def cache_response(self, cache_key, data):
         """Caches the response data."""
-        cache.set(cache_key, data, settings.CACHE_TTL if hasattr(settings, 'CACHE_TTL') else 60)  # Default TTL 60 seconds
+        cache.set(
+            cache_key,
+            data,
+            settings.CACHE_TTL if hasattr(settings, "CACHE_TTL") else 60,
+        )  # Default TTL 60 seconds
+
+
+@api_view(["GET"])
+@permission_classes([])
+def get_companies(request):
+    companies = Company.objects.all()
+    serializer = CompanySerializer(companies, many=True)
+    return Response(serializer.data)
+
+
+class CompanyViewSet(ViewSet):
+    permission_classes = []
+    pagination_class = CustomPagination
+
+    def list(self, request):
+        companies = Company.objects.all()
+        serializer = CompanySerializer(companies, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        company = Company.objects.get(id=pk)
+        serializer = CompanySerializer(company)
+        return Response(serializer.data)

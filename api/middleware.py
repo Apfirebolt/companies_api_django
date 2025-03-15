@@ -1,6 +1,5 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.http import HttpResponse
-from rest_framework.response import Response
 from xml.etree.ElementTree import Element, SubElement, tostring
 import json
 
