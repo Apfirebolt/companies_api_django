@@ -1,17 +1,19 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.http import HttpResponse
+from rest_framework.response import Response
 from xml.etree.ElementTree import Element, SubElement, tostring
 import json
 
 
 class JsonToXmlMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
-        if request.headers.get('Accept') == 'application/xml' and response.status_code == 200:
-            data = response.data
+        if request.headers.get('Format') == 'xml' and response.status_code == 200:
+            data = {'data': response.data}
             root = Element('response')
             self._build_xml(root, data)
             xml_str = tostring(root, encoding='utf-8')
             return HttpResponse(xml_str, content_type='application/xml')
+    
         return response
 
     def _build_xml(self, element, data):
