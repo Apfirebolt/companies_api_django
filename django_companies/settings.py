@@ -74,6 +74,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Middleware for converting JSON to XML
+    'api.middleware.JsonToXmlMiddleware', 
 ]
 
 ROOT_URLCONF = 'django_companies.urls'
