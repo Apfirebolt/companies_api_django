@@ -155,6 +155,8 @@ CACHES = {
         "LOCATION": "redis://localhost:6379",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "SERIALIZER": "django_redis.serializers.json.JSONSerializer",
+            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor", # for compression
             "KEY_PREFIX": "companies"
         }
     }
