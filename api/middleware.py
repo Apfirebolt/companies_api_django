@@ -28,19 +28,15 @@ class JsonToXmlMiddleware(MiddlewareMixin):
             element.text = str(data)
 
     def process_request(self, request):
-        print('Request headers:', request.headers)
         if request.headers.get('Content-Type') == 'application/xml':
             request.data = json.loads(json.dumps(request.data))
         return None
     
     def process_exception(self, request, exception):
-        print('Exception:', exception)
         return None
     
     def process_template_response(self, request, response):
-        print('Template response:', response)
         return response
     
     def process_view(self, request, view_func, view_args, view_kwargs):
-        print('View function:', view_func)
         return None

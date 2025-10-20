@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     'django_filters',
     'django_celery_beat',
     'django_redis',
+    'django_elasticsearch_dsl',
+    'django_elasticsearch_dsl_drf',
 
     # Add the companies app to the list of installed apps
     'accounts',
@@ -216,6 +218,14 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer", ),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
 }
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'localhost:9200'
+    },
+}
+
+ELASTICSEARCH_DSL_AUTO_REFRESH = False
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

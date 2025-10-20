@@ -1,59 +1,41 @@
+# myapp/documents.py (assuming your app is named 'myapp')
+
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from core.models import Company  # Assuming your app name is 'core'
+from .models import Company  # Import your Company model
 
 @registry.register_document
 class CompanyDocument(Document):
+    # 1. Define Fields with appropriate Elasticsearch types
 
-    employee_count = fields.KeywordField(
-        attr='no_of_employee',
-        # This will be used for filtering/faceting
-    )
-
-    age = fields.KeywordField() # The Elasticsearch field name is 'age'
-
-    def prepare_age(self, instance):
-        """
-        Cleans and normalizes the 'company_age' field for indexing.
-        Example: "10 years old" -> "10 years"
-        """
-        age_str = instance.company_age
-        if age_str and " years old" in age_str:
-            return age_str.replace(" years old", " years").strip()
-        return age_str
-    
-    # ----------------------------------------------------------------------
-    # Regular Field Definitions (for text search/sorting)
-    # ----------------------------------------------------------------------
-    
     name = fields.TextField(
-        analyzer='standard',
-        fields={
-            'suggest': fields.CompletionField(), # For autocomplete features
-            'keyword': fields.KeywordField(),    # For exact matching
-        }
+        attr='name',
+        # 'KeywordField' is good for exact matching (e.g., filtering)
+        fields={'raw': fields.KeywordField()}
     )
-
-    rating = fields.FloatField()
     
-    review = fields.TextField(analyzer='standard')
+    # 'FloatField' is perfect for numerical rating
+    rating = fields.FloatField(attr='rating')
 
-    # Using KeywordField for filtering on specific company types
-    company_type = fields.KeywordField()
+    # 'TextField' is ideal for full-text searching (like review content)
+    review = fields.TextField(attr='review')
 
-    head_quarters = fields.KeywordField() # For filtering by city/location
+    # 'KeywordField' is better for categorical or exact data (like filters)
+    company_type = fields.KeywordField(attr='company_type')
+    head_quarters = fields.KeywordField(attr='head_quarters')
+    company_age = fields.KeywordField(attr='company_age')
+    no_of_employee = fields.KeywordField(attr='no_of_employee')
 
+
+    # 2. Define the Index and Django Model connection
     class Index:
-        # Define the name of the Elasticsearch index
-        name = 'companies'
-        # Define index settings
+        name = 'companies' 
         settings = {'number_of_shards': 1, 'number_of_replicas': 0}
 
     class Django:
-        model = Company  # The Django model to index
+        model = Company 
+
+        fields = [
+            'id',
+        ]
         
-        # List all Django fields NOT explicitly defined above for automatic mapping.
-        # Since we defined most fields manually, we can omit 'fields' here or 
-        # list the remaining model fields if you want them indexed automatically.
-        # In this example, we've defined all relevant fields explicitly.
-        pass

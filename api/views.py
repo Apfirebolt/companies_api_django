@@ -20,6 +20,8 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from django_filters.rest_framework import DjangoFilterBackend
 from accounts.models import CustomUser
 from core.models import Company
+from core.documents import CompanyDocument
+from elasticsearch_dsl import Q
 from rest_framework.response import Response
 from .pagination import CustomPagination
 from rest_framework.decorators import api_view, permission_classes
@@ -129,8 +131,30 @@ class ListCompaniesApiView(ListCreateAPIView):
 @api_view(["GET"])
 @permission_classes([])
 def get_companies(request):
-    companies = Company.objects.all()
-    serializer = CompanySerializer(companies, many=True)
+
+    s = CompanyDocument.search()
+    
+    # Get the search query from the request's query parameters
+    query = request.query_params.get('q', None)
+    
+    if query:
+        search_fields = ['name', 'review', 'company_type']
+        
+        q = Q(
+            'multi_match', 
+            query=query, 
+            fields=search_fields, 
+            fuzziness='AUTO' # Optional: Add fuzzy matching for better results
+        )
+        s = s.query(q)
+    try:
+        companies_queryset = s.to_queryset()
+    except Exception as e:
+        # Handle connection errors or other ES issues gracefully
+        print(f"Elasticsearch Error: {e}")
+        return Response({"detail": "Search service temporarily unavailable."}, status=503)
+
+    serializer = CompanySerializer(companies_queryset, many=True)
     return Response(serializer.data)
 
 
