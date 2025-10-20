@@ -1,0 +1,38 @@
+{% extends 'base.html' %} 
+{% load static %} 
+{% block title %} Django Companies - List
+{% endblock %} 
+
+{% block content %}
+
+<body>
+  {% include 'header.html' %}
+  <div class="about-container">
+    <h2 class="heading">Contact</h2>
+    <div class="columns">
+        <div class="column is-5">
+            <figure class="image is-4by3">
+                <img
+                    src="https://picsum.photos/800/600/?random"
+                    alt="Company Image"
+                />
+            </figure>
+        </div>
+    </div>
+    <div class="company-list">
+      <h3 class="subheading">Companies</h3>
+      <ul>
+        {% for company in companies %}
+          <li class="company-item">
+            <h4 class="company-name">{{ company.name }}</h4>
+            <p class="company-description">{{ company.description }}</p>
+          </li>
+        {% empty %}
+          <li>No companies available.</li>
+        {% endfor %}
+      </ul>
+</div>
+  {% include 'footer.html' %}
+</body>
+
+{% endblock %}
